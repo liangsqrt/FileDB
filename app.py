@@ -1,28 +1,12 @@
-from datetime import datetime
-from decimal import Decimal
-from logging.config import dictConfig
-from bson import ObjectId
 from flask import Flask as _Flask, make_response
-from flask.json import JSONEncoder
-import yaml
 from flask_script import Manager
 from config import *
+from server.common import add_blueprint
+import sys,os
+base_dir = os.path.dirname(__file__)
+sys.path.append(base_dir)
 
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, o):  # pylint: disable=method-hidden
-        if isinstance(o, Decimal):
-            res = float(o)
-        elif isinstance(o, ObjectId):
-            res = str(o)
-        else:
-            res = JSONEncoder.default(self, o)
-        return res
-
-class Flask(_Flask):
-    json_encoder = CustomJSONEncoder
-
-app = Flask(  # pylint: disable=invalid-name
+app = _Flask(
     __name__,
 )
 
@@ -54,5 +38,8 @@ def af_request(resp):
 
 
 add_blueprint(app)
-register_error_handler(app)
+
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0",port=8002)
 
