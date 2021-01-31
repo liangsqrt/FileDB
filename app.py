@@ -2,9 +2,6 @@ from flask import Flask as _Flask, make_response
 from flask_script import Manager
 from config import *
 from server.common import add_blueprint
-import sys,os
-base_dir = os.path.dirname(__file__)
-sys.path.append(base_dir)
 
 app = _Flask(
     __name__,
