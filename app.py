@@ -1,12 +1,13 @@
 from flask import Flask as _Flask, make_response
 from flask_script import Manager
 from config import *
+import config
 from server.common import add_blueprint
 
 app = _Flask(
     __name__,
 )
-
+app.config.from_object(config)
 manager = Manager(app)
 
 @manager.option('-h', '--host', dest='host', default='0.0.0.0')

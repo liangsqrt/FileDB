@@ -1,10 +1,10 @@
 import sys,os
 
 
-base_dir = os.path.dirname(__file__)
-sys.path.append(base_dir)
+BASE_DIR = os.path.dirname(__file__)
+sys.path.append(BASE_DIR)
 
 HOST = "0.0.0.0"
 PORT = "9999"
 
-config_path = os.path.join(base_dir, "config.json")
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
