@@ -1,3 +1,5 @@
 {
-  "xxx.yaml": "/home/user/xxx.yaml"
+  "a.txt": "C:\\Users\\xiaobr\\Desktop\\testzip\\a.yaml",
+  "b.txt": "C:\\Users\\xiaobr\\Desktop\\testzip\\b.yaml",
+  "c.txt": "C:\\Users\\xiaobr\\Desktop\\testzip\\c.yaml"
 }
