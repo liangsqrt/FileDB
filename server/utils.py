@@ -5,7 +5,10 @@ def add_url_include(app, model, url_head=None, namespace=""):
     for url_end, cls_value, name in model:
         url_one = url_head + url_end
         as_view_name = namespace + name
-        app.add_url_rule(url_one, view_func=cls_value.as_view(as_view_name))
+        try:
+            app.add_url_rule(url_one, view_func=cls_value.as_view(as_view_name))
+        except Exception as e:
+            print(e)
 
 
 def res_json(error_code, data=None, msg=None,**kwargs):
