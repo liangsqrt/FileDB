@@ -1,0 +1,6 @@
+data:
+  dict1: data
+  list:
+    - 1
+    - 2
+    - 3
