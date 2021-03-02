@@ -61,5 +61,11 @@ class Database(object):
     def create_table(self, table):
         pass
 
+    def export_to_file(self):
+        pass
+
+    def import_from_file(self):
+        pass
+
 
 

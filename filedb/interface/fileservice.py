@@ -2,7 +2,9 @@ from abc import ABCMeta
 from zope.interface import Interface, Attribute
 from zope.interface.declarations import implementer
 from zope.interface import verify
-
+from zope.interface import implementer
+from abc import ABCMeta,abstractmethod
+import six
 # weakref
 # class a(dict)
 
@@ -23,7 +25,29 @@ class FileServiceInterface(Interface):
 
 
 
+@implementer(FileServiceInterface)
+@six.add_metaclass(ABCMeta)
+class FileService(object):
+    filename = ""
+    file_path = ""
+    type = ""
+    encoding = ""
+    config = ""
+    @abstractmethod
+    def save(self, data):
+        """save"""
 
+    @abstractmethod
+    def read(self) -> dict:
+        """read"""
+
+    @abstractmethod
+    def from_config(self, Config):
+        """pass"""
+
+    @abstractmethod
+    def is_existed(self):
+        """pass"""
 
 
 

@@ -2,7 +2,7 @@
 from filedb.service.fileservice import fileservice_map
 
 
-class Table(object):
+class Collection(object):
     conf = None
     service = None
 
@@ -25,4 +25,7 @@ class Table(object):
     def _get_fileservice_class(self, file_type):
         if file_type and file_type in fileservice_map.keys():
             return fileservice_map[file_type]
+
+    def find(self, query: dict):
+        pass
 
