@@ -1,35 +1,8 @@
 from filedb.interface.fileservice import FileServiceInterface
-from zope.interface import implementer
-from abc import ABCMeta,abstractmethod
-import six
 import os
 import json
 from ruamel.yaml import YAML
-
-
-@implementer(FileServiceInterface)
-@six.add_metaclass(ABCMeta)
-class FileService(object):
-    filename = ""
-    file_path = ""
-    type = ""
-    encoding = ""
-    config = ""
-    @abstractmethod
-    def save(self, data):
-        """save"""
-
-    @abstractmethod
-    def read(self) -> dict:
-        """read"""
-
-    @abstractmethod
-    def from_config(self, Config):
-        """pass"""
-
-    @abstractmethod
-    def is_existed(self):
-        """pass"""
+from filedb.interface.fileservice import FileService
 
 
 class JsonFileService(FileService):

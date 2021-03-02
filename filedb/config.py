@@ -1,20 +1,9 @@
-from zope.interface import Interface, implementer
-from filedb.interface.fileservice import FileServiceInterface
 from configparser import ConfigParser
-from abc import ABCMeta, abstractmethod
-import six
 from filedb.utils import closest_file_db_cfg
+from filedb.interface.config import ConfigFileServiceAbstract
 import os
 
 base_dir = os.path.abspath(__file__)
-
-
-@implementer(FileServiceInterface)
-@six.add_metaclass(ABCMeta)
-class ConfigFileServiceAbstract(object):
-    @abstractmethod
-    def load(self):
-        pass
 
 
 class DefaultConfig(ConfigFileServiceAbstract, ConfigParser):
