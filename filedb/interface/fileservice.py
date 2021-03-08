@@ -5,8 +5,6 @@ from zope.interface import verify
 from zope.interface import implementer
 from abc import ABCMeta,abstractmethod
 import six
-# weakref
-# class a(dict)
 
 
 class FileServiceInterface(Interface):

@@ -2,6 +2,7 @@
 from filedb.service.fileservice import fileservice_map
 
 
+# 做成工厂模式吧
 class Collection(object):
     conf = None
     service = None
