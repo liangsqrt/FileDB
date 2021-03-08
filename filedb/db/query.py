@@ -6,13 +6,7 @@ base_path3 = os.path.dirname(base_path2)
 sys.path.append(base_path)
 sys.path.append(base_path2)
 sys.path.append(base_path3)
-from filedb.interface.query import QueryAbstract, QueryFilter
-# client = pymongo.MongoClient()
-#
-# database = client["ddd"]
-# col = database["xxx"]
-# col.find_and_modify()
-
+from filedb.interface.query import DistQueryResultFilter, ListQueryResultAbstract, QueryResultInterface
 
 # class QueryDict(QueryAbstract, dict):
 #     """
@@ -28,6 +22,43 @@ from filedb.interface.query import QueryAbstract, QueryFilter
 # class QueryList(QueryAbstract, list):
 #     def find(self):
 #         pass
+__doc__ = "this module is focus on trans search_dict which input by user to inner query objects "
+__doc__ += "这个类主要是用来提供将普通的dict查询翻译成查询类的，"
+
+
+
+# class QueryResult()
+
+query_types = [
+
+]
+
+
+class FString(object):
+    def __init__(self):
+        pass
+
+    def re(self):
+        pass
+
+
+class FList(object):
+    def __init__(self):
+        pass
+
+
+class FDict(object):
+    def __init__(self):
+        pass
+
+
+# TODO: 1. 支持key的正则匹配；2. 对value自持in list， 索引，like， 正则， 大于，小于等于
+
+class ListQuerySet(FList):
+    @classmethod
+    def __new__(cls, *args, **kwargs):
+        return
+
 
 
 def rec_merge(d):
@@ -46,9 +77,9 @@ def rec_merge(d):
         return [key], value
     
 
-class DictFilterParser(QueryFilter, dict):
-    def set_state(self, data):
-        for _k,_v in data.items():
+class DictFilterParser(DistQueryResultFilter, dict):
+    def feed_state(self, data):
+        for _k, _v in data.items():
             self[_k] = _v
 
     def next_condition(self):

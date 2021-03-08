@@ -58,7 +58,14 @@ class Database(object):
             })
         return self.tables[item]
 
-    def create_table(self, table):
+    def create_table(self, table, path="", pattern="single"):
+        """
+
+        :param table:
+        :param path:
+        :param pattern: single means that db file content is dict_like; database is list_like just like mongo
+        :return:
+        """
         pass
 
     def export_to_file(self):
