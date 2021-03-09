@@ -58,7 +58,6 @@ class QuerySet():
     @classmethod
     def __new__(cls, data, *args, **kwargs):
         if type(data) == dict:
-            
             return DictQuerySet
         elif type(data) == list:
             return ListQuerySet
