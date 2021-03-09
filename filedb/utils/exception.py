@@ -20,5 +20,5 @@ class CantFindError(Exception):
 def exception_handler(func, *args, **kwargs):
     try:
         func(*args, **kwargs)
-    except CantFindError:
+    except CantFindError:  # TODO: 拦截异常，可以在查找的时候不用链式返回，直接raise Exception退出查询
         return None

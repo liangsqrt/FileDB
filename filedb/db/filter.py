@@ -21,7 +21,7 @@ class EqualType(object):
     def __init__(self):
         self.query_set = {}
 
-    def __call__(self, key, value, data:dict, *args, **kwargs):
+    def __call__(self, key, value, data: dict, *args, **kwargs):
         return value == data.get(key)
 
 
@@ -69,11 +69,10 @@ class LessEqualType(object):
 class RegexType(object):
     name = '$re'
     priority = 1
-    # def __init__(self):
-        # self.pattern = re.compile(pattern)
     
     def __call__(self, key:str, value, data:dict, *args, **kwargs):
-        return re.match(value, data.get(key))
+        # return re.match()
+        return re.match(value, data.get(key)).group()
 
 
 class ContainType(object):
@@ -111,9 +110,10 @@ query_map = {
 class Filter(object):
     priority = 0
     query_data = {}
-    child_filter = []
+    task_list = []  # 需要继续迭代判断的额
     father_node = None
     father_key = ""
+
     def __init__(self, father_node,  father_key:str, query_data:dict, priority:int):
         self.father_node = father_node
         self.father_key = father_key
@@ -142,89 +142,111 @@ class Filter(object):
             if _k in query_map.keys():
                 continue # must has been paserd
             elif type(_v) in [int, str, float, bool]:
-                return EqualType()(_k, _v, data)
+                r = EqualType()(_k, _v, data)
+                if not r:
+                    return False
             elif isinstance(_v, dict):
-                inter_set = _v.keys().intersection(query_map.keys())
+                inter_set = set(_v.keys()).intersection(set(query_map.keys()))
                 for _condition in inter_set:
-                    if not query_map[_condition](_k, _v, data):
+                    if not query_map[_condition]()(_k, _v.get(_condition), data):
                         return False
                 else:
-                    self.child_filter.append(Filter(father_node=self, father_key=_k, query_data=_v, priority=self.priority+1)) # TODO: only this condition should go on !
-                    return _v
+                    self.task_list.append({
+                        "data": data.get(_k), 
+                        "filter": Filter(father_node=self, father_key=_k, query_data=_v, priority=self.priority+1)
+                    }) # TODO: only this condition should go on !
             elif isinstance(_v, list) and _k not in query_map.keys():
-                return EqualType()(_k, _v, data)                
+                r = EqualType()(_k, _v, data) 
+                if not r:
+                    return False
             else:
                 raise Exception("未知类型的筛选功能")
+        return True
     
     @property
-    def could_continued(self):
+    def status(self):  # 是否判断完了, 暂时无用
         return self.child_filter == []
 
 
+class FilterBatch(object):
+    """
+    针对单个数据，相对于filterset是处理多个[object{}, object{}...]， filterBatch重心在于结合filter，判断这个数据能否通过
+    """
+    priority = 0  # 暂时没用
+    task_list = []
+    def __init__(self, data, query_data):  # 统一query_data 和 data的命名风格
+        self.task_list.append(
+            {
+                "data": data,
+                "filter": Filter(None, father_key="", query_data=query_data, priority=0)
+            }
+        )
+
+
+    def filter(self):
+        """
+        filter 返回的k，v可读太差
+        """
+        while not self.status:
+            r = self.next()
+            if r==False:
+                return False
+        return True
+
+    def next(self):
+        """
+        上一轮全部通过可以进入下一轮
+        """
+        task_list = []
+        for _task_data in self.task_list:
+            filter = _task_data.get("filter")
+            data = _task_data.get("data")
+            r = filter.filter(data)
+            if(isinstance(r, bool)) and not r:
+                return False
+            elif isinstance(r, dict): # 其他的list, str, int, bool这些，只会返回true或者false
+                task_list = task_list + filter.task_list
+        self.priority += 1
+        self.task_list = task_list
+
+    @property
+    def status(self):
+        return self.task_list == []
+
+            
+
 class FilterSet(object):
-    filter_set = []
-    priority = 0
     status = True
-    data = None
-    
-    def __init__(self, query_data):
-        f = Filter(father_node=None, father_key="", query_data=query_data, priority=0)
-        # self.filter = f
-        self.filter_set.append(f)
+    def __init__(self, query_data={}):
+        self.query_data =query_data
     
     def filter(self, input_data):
         """
         返回被查找到的元素的索引，如果一条都没有找到，证明查询不合法。
         TODO: 过滤结束后保留合格的数据索引
         """
-        # targe_result = []
-        # if not isinstance(input_data, list):
-        #     raise Exception("filter的数据不合翻")
-        # for index, data in enumerate(input_data):
-        #     next_data = next(data)
-        #     if isinstance(next_data, bool):
-        #         if next_data:
-        #             return True
-        #         else:
-        #             return False
-        next_data = self.next(input_data)
-        while self._has_next_batch():
-            next_data = next_data(next_data)
-            if isinstance(next_data, bool):
-                if not next_data:
-                    return False
-
-    def _has_next_batch(self):
-        tmp_filter = []
-        for _f in self.filter_set:
-            for _child_filter  in _f.child_filter:
-                tmp_filter.append(_child_filter)
-        self.filter_set = tmp_filter
-        # yield [x for x in self.filter_set if x.priority==self.priority]
-        if self.filter_set:
-            yield True
-        self.priority += 1
-    
-    def next(self, data):
-        filtered_data = []
-        for _filter in self.filter_set:
-            r = _filter.filter(data)
-            # 注意区分dict和bool的区别
-            if(isinstance(r, bool)) and r:
-                self.status = False #  不可以继续迭代了
-                return True
-            elif(isinstance(r, bool)) and not r:
-                self.status = False
-                return False
-            elif isinstance(r, dict):
-                self.data = r
-                self.status = True # 是否可以继续
-                filtered_data.append(r)
-        return filtered_data
+        target_result = []
+        if not isinstance(input_data, list):
+            raise Exception("filter的数据不合翻")
+        for index, data in enumerate(input_data):
+            filter_batch = FilterBatch(data=data, query_data=self.query_data)
+            r = filter_batch.filter()
+            if r:
+                target_result.append(data)
+        return target_result
 
 
 if __name__ == '__main__':
-    f = FilterSet(query_data={"name":"zhansan"})
-    print(f.filter({"name":"zhangsna"}))
+    data = [
+        {"name":"zhangsan"},
+        {"name":"zhanger"},
+        {"name":"zhangsi"},
+        ]
+    
+    f = FilterSet(query_data={"name":{
+        "$re": "zhang.*"
+    }})
+
+    print(f.filter(data))
     
 

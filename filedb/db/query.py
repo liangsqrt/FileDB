@@ -81,6 +81,8 @@ class DictQuerySet(FDict):
                 if r:
                     tmp_data.append(r)
         self.data = tmp_data
+
+
 class ListQuerySet(FList):
     data = []
     def __init__(self, data):
@@ -147,6 +149,6 @@ if __name__ == '__main__':
     # }
     # EqualType()
     query_set = QuerySet({"data":1})
-    query_set.
+    # query_set.
 
 

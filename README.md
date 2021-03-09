@@ -14,7 +14,10 @@
 7. 将所有中文翻译一遍
 8. 现在区分相同元素的唯一方法是index，后期考虑加上_id字段
 
+#### notice
 
+1. 我似乎搞混了queryset, filter_set, filter之间的关系： 似乎filterSet里边的next_batch才是我的filterSet的本意，现在的filterSet跟querySet的区别差不多了
+2. filter中的mvc做得不够到位
 # TODO:
 1. 提高程序可读性
 2. 增加程序的效率
