@@ -6,7 +6,7 @@ base_path3 = os.path.dirname(base_path2)
 sys.path.append(base_path)
 sys.path.append(base_path2)
 sys.path.append(base_path3)
-from filedb.interface.query import DistQueryResultFilter, ListQueryResultAbstract, QueryResultInterface
+from filedb.interface.query import DistQueryResultFilter#, ListQueryResultAbstract, QueryResultInterface
 
 # class QueryDict(QueryAbstract, dict):
 #     """
@@ -54,10 +54,53 @@ class FDict(object):
 
 # TODO: 1. 支持key的正则匹配；2. 对value自持in list， 索引，like， 正则， 大于，小于等于
 
-class ListQuerySet(FList):
+class QuerySet():
     @classmethod
-    def __new__(cls, *args, **kwargs):
-        return
+    def __new__(cls, data, *args, **kwargs):
+        if type(data) == dict:
+            
+            return DictQuerySet
+        elif type(data) == list:
+            return ListQuerySet
+        else:
+            return data
+
+
+class DictQuerySet(FDict):
+    data = []
+    filter_set = []
+    def __init__(self, data):
+        self.data.append(data)
+    
+    def _query(self):
+        # for _func in self.filter_set:
+        #     _func(self.data)
+        tmp_data = []
+        for _data in self.data:
+            for _func in self.filter_set:
+                r = _func(_data)
+                if r:
+                    tmp_data.append(r)
+        self.data = tmp_data
+class ListQuerySet(FList):
+    data = []
+    def __init__(self, data):
+        self.data = data
+    def _query(self):
+            # for _func in self.filter_set:
+        #     _func(self.data)
+        for _data in self.data:
+            for _func in self.filter_set:
+                _func(_data)
+    
+
+# TODO: 先专门针对value做筛选，不管key, 后期考虑添加上对key的支持
+def check_types( data:dict):
+    for _k,_v in data.items():
+        if _k in query_types:
+            return query_types[_k],
+        else:
+            return "$eq",_k, _v
 
 
 
@@ -100,17 +143,11 @@ class DictFilterParser(DistQueryResultFilter, dict):
             
 
 if __name__ == '__main__':
-    dict_filter = DictFilterParser()
-    dict_filter["a"] = {
-        "a1": 1,
-        "a2": {
-            "b1":11,
-            "b2":12
-        }
-    }
-    dict_filter["b"] = 2
-    print(dict_filter)
-    print(dict_filter.next_condition())
-    # ccc = [x for x in dict_filter.next_condition([dict_filter])]
-    # print(ccc)
+    # query = {
+    #     "data":{"table":1}
+    # }
+    # EqualType()
+    query_set = QuerySet({"data":1})
+    query_set.
+
 

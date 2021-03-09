@@ -1,7 +1,5 @@
 from abc import ABCMeta
 from zope.interface import Interface, Attribute
-from zope.interface.declarations import implementer
-from zope.interface import verify
 from zope.interface import implementer
 from abc import ABCMeta,abstractmethod
 import six
