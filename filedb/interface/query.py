@@ -9,16 +9,16 @@ from filedb.utils.exception import IllegalBehaveException
 
 
 class QueryResultInterface(Interface):
-    def find(condition):
+    def _find(condition):
         """init self by config"""
 
-    def insert_one():
+    def _insert_one():
         """read json/yaml file"""
 
-    def update():
+    def _update():
         """save json/yaml file"""
 
-    def delete():
+    def _delete():
         """"""
 
 
@@ -30,23 +30,23 @@ class ListQueryResultAbstract(list):
         super(ListQueryResultAbstract, self).__init__()
 
     @abstractmethod
-    def insert_one(self, data):
+    def _insert_one(self, data):
         self.append(data)
 
     @abstractmethod
-    def find(self, filter) -> QueryResultInterface:
+    def _find(self, filter) -> QueryResultInterface:
         pass
 
     @abstractmethod
-    def update(self, filter):
+    def _update(self, filter):
         pass
 
     @abstractmethod
-    def upsert(self, filter):
+    def _upsert(self, filter):
         pass
 
     @abstractmethod
-    def delete(self, filter):
+    def _delete(self, filter):
         pass
 
 
@@ -59,19 +59,19 @@ class DistQueryResultFilter(dict):
     def set_state(self, data):
         pass
 
-    def insert_one(self, data):
+    def _insert_one(self, data):
         raise IllegalBehaveException("dict型result，不支持次数据插入")
 
     @abstractmethod
-    def find(self, data):
+    def _find(self, data):
         raise Exception("请添加find方法")
 
     @abstractmethod
-    def update(self, data, *args,**kwargs):
+    def _update(self, data, *args,**kwargs):
         pass
 
     @abstractmethod
-    def delete(self, data):
+    def _delete(self, data):
         raise Exception("请复写此方法")
     
     @abstractmethod
