@@ -6,7 +6,7 @@ import six
 
 
 class FileServiceInterface(Interface):
-    def from_config(ConfigInterface):
+    def install_config(ConfigInterface):
         """init self by config"""
 
     def read():
@@ -38,7 +38,7 @@ class FileService(object):
         """read"""
 
     @abstractmethod
-    def from_config(self, Config):
+    def install_config(self, Config):
         """pass"""
 
     @abstractmethod

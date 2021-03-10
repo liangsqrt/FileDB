@@ -12,10 +12,10 @@ class ConfigServiceInterface(Interface):
     def reload():
         """save json/yaml file"""
 
-    def update() -> bool:
+    def update():
         """check """
 
-    def set_config(key, value):
+    def set_config():
         """set value"""
 
 

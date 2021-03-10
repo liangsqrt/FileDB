@@ -6,7 +6,11 @@ from filedb.interface.fileservice import FileService
 
 class JsonFileService(FileService):
     def read(self):
-        return self._read(self.file_path)
+        r = self._read(self.file_path)
+        if isinstance(r, list):
+            return r
+        else:
+            return [r]
 
     def save(self, data):
         self._write_file(self.file_path, data)
@@ -22,8 +26,12 @@ class JsonFileService(FileService):
             file_data = json.load(r_f)
             return file_data
 
-    def from_config(self, config):
+    def install_config(self, config):
+        if config.type != "json":
+            raise Exception("filetype and storage service unmatched!")
         self.config = config
+        self.file_path = config.file_path
+        self.filename = config.file_path.split("/")[-1]
 
     def is_existed(self):
         if not os.path.exists(self.file_path):
@@ -54,15 +62,19 @@ class YAMLFileService(FileService):
     def save(self, data):
         self._write_file(data)
 
-    def from_config(self, Config):
-        print("from config")
+    def install_config(self, config):
+        if config.type != "yaml":
+            raise Exception("filetype and storage service unmatched!")
+        self.config = config
+        self.file_path = config.file_path
+        self.filename = config.file_path.split("/")[-1]
 
     def is_existed(self):
         if not os.path.exists(self.file_path):
             raise FileExistsError(self.file_path)
 
 
-storage_map = {
+StorageMap = {
     "json": JsonFileService,
     'yaml': YAMLFileService,
     "xml": None

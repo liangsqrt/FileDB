@@ -105,8 +105,8 @@ query_map = {
 
 # TODO: 目前是把所有的dict当做list来处理，没有专门区分dict和list
 # TODO: 提高可读性
-# TODO: 完成的只是条件过滤，还没有写内容结果提取！！
 # TODO: 考虑用exception替换到层层返回逻辑
+# TODO: re查找的结果不太懂UI， 查找zhang. 返回的应该只有zhangs, 像什么zhangsi就不返回
 class Filter(object):
     priority = 0
     query_data = {}
@@ -165,7 +165,7 @@ class Filter(object):
     
     @property
     def status(self):  # 是否判断完了, 暂时无用
-        return self.child_filter == []
+        return self.task_list == []
 
 
 class FilterBatch(object):
@@ -174,6 +174,7 @@ class FilterBatch(object):
     """
     priority = 0  # 暂时没用
     task_list = []
+
     def __init__(self, data, query_data):  # 统一query_data 和 data的命名风格
         self.task_list.append(
             {
@@ -182,14 +183,13 @@ class FilterBatch(object):
             }
         )
 
-
     def filter(self):
         """
         filter 返回的k，v可读太差
         """
         while not self.status:
             r = self.next()
-            if r==False:
+            if r == False:
                 return False
         return True
 
@@ -213,12 +213,12 @@ class FilterBatch(object):
     def status(self):
         return self.task_list == []
 
-            
 
 class FilterSet(object):
     status = True
+
     def __init__(self, query_data={}):
-        self.query_data =query_data
+        self.query_data = query_data
     
     def filter(self, input_data):
         """
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         ]
     
     f = FilterSet(query_data={"name":{
-        "$re": "zhang.*"
+        "$re": "zhang."
     }})
 
     print(f.filter(data))
