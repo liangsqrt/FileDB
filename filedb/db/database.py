@@ -34,6 +34,7 @@ class Database(object):
         self.name = name
         self.conf = config
         self.db_dir = config.db_dir
+        self.install_config()
 
     @staticmethod
     def check_conf(conf: DatabaseConfig):
@@ -61,15 +62,16 @@ class Database(object):
         for _name, _col_conf in self.conf.collections.items():
             self[_name] = Collection(name=_name, conf=_col_conf)
 
-    def delete(self, table):
-        if table in self.collections.keys():
-            self._delete_table(table)
-        else:
-            print("该表不存在！")
+    def destroy(self, are_you_sure=False):
+        if are_you_sure:
+            for name, col in self.collections.items():
+                col.destroy()
+                del self.collections[name]
 
-    def _delete_table(self, table):
-        self.collections[table].delete()
-        del self.collections[table]
+    def delete_collection(self, collection_name):
+        if collection_name in self.collections.keys():
+            self.collections[collection_name].destroy()
+            del self.collections[collection_name]
 
     def __getitem__(self, item):
         if item not in self.collections.keys():

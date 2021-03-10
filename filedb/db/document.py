@@ -1,3 +1,4 @@
+import os
 from filedb.service.storage import StorageMap
 from filedb.config import DocumentConfig
 from filedb.db.filter import FilterSet
@@ -47,6 +48,9 @@ class Document(BaseDict):
     def _get_storage_class( file_type):
         if file_type and file_type in StorageMap.keys():
             return StorageMap[file_type]
+        
+    def destroy(self):
+        os.remove(self.storage_service.file_path)
 
     def find(self, query: dict, format_dict: dict = {}):
         query_set = FilterSet(query_data=query)
@@ -54,3 +58,4 @@ class Document(BaseDict):
         if format_dict:
             result = [Formater.format(format_dict, x) for x in result]
         return result
+

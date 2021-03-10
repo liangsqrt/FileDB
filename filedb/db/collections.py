@@ -9,7 +9,6 @@ from filedb.config import CollectionConfig
 
 class Collection(BaseDict):
     conf: CollectionConfig = None
-    service: FileService = None
     documents: {str: Document} = {}
     name = None
 
@@ -17,15 +16,15 @@ class Collection(BaseDict):
         super(Collection, self).__init__()
         self.name = name
         self.conf = conf
+        self.install_config()
 
     def install_config(self):
         self.initial_document()
 
     def initial_document(self):
         for _name, _conf in self.conf.db_conf.items():
-            self[_name] = Document()
+            self[_name] = Document(conf=_conf)
 
-    
     def __getitem__(self, value):
         if value in self.documents.keys():
             return self.documents[value]
@@ -38,7 +37,13 @@ class Collection(BaseDict):
         else:
             raise Exception("不支持的文档")
 
-    def delete(self):
-        os.remove(self.service.file_path)
-         
+    def destroy_all(self):
+        for name, doc in self.documents.items():
+            doc.destory()
+            del self.documents[name]
+
+    def destroy(self, doc_name):
+        if doc_name in self.documents.keys():
+            self.documents[doc_name].destroy()
+            del self.documents[doc_name]
 
