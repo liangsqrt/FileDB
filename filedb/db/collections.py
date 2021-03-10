@@ -1,12 +1,14 @@
 # TODO ： 统一入参table和table_name
 from filedb.service.storage import storage_map
+from filedb.db.document import  BaseDict
 
+# TODO: 需要将基础数据类型汇总到某个地方
 
 # 做成工厂模式吧
-class Collection(object):
+class Collection(BaseDict):
     conf = None
     service = None
-    documents = []
+    documents: { str: BaseDict} = {}
 
     @classmethod
     def from_config(cls, conf):  # TODO: 应该是from db 还是from config

@@ -143,12 +143,5 @@ class DictFilterParser(DistQueryResultFilter, dict):
 
             
 
-if __name__ == '__main__':
-    # query = {
-    #     "data":{"table":1}
-    # }
-    # EqualType()
-    query_set = QuerySet({"data":1})
-    # query_set.
 
 
