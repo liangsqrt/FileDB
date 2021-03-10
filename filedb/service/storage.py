@@ -1,4 +1,3 @@
-# from filedb.interface.fileservice import FileServiceInterface
 import os
 import json
 from ruamel.yaml import YAML
@@ -63,7 +62,7 @@ class YAMLFileService(FileService):
             raise FileExistsError(self.file_path)
 
 
-fileservice_map = {
+storage_map = {
     "json": JsonFileService,
     'yaml': YAMLFileService,
     "xml": None

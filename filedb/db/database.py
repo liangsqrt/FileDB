@@ -1,5 +1,6 @@
-from filedb.service.fileservice import fileservice_map
+from filedb.service.storage import storage_map
 import os
+from filedb.config import DatabaseConfig
 
 
 # 增加单例模式
@@ -9,18 +10,22 @@ class Database(object):
     default_table_type = None
     base_db_path = None
 
-    @classmethod
-    def from_config(cls, conf):
-        cls.conf = conf
-        cls.check_filedb_conf(conf)  # 检查的逻辑应该放在那里
-        cls.base_db_path = conf["database"].get("base_db_path")
-        cls.default_table_type = conf["database"].get("default_tables_file_type")
-        return cls
+    # @classmethod
+    # def from_config(cls, conf: DatabaseConfig):
+    #     cls.conf = conf
+    #     cls.base_db_path = conf.default_conf_file_dir
+    #     cls.default_table_type = conf.default_db_file_type
+    #     return cls
 
     @staticmethod
-    def check_filedb_conf(conf):
-        if "tabels" not in conf.sections():
-            raise Exception("配置文件不正确，tables配置不存在")
+    def check_conf(conf:DatabaseConfig):
+        """
+        检测配置文件是否合法
+        :key
+        """
+        assert hasattr(DatabaseConfig, "name"), "database must have a name"
+        assert hasattr(DatabaseConfig, "collections"), "haven't get any collection config info"
+        assert hasattr(DatabaseConfig, "default_conf_file_dir", "haven't ")
         if "databases" not in conf.sections():
             raise Exception("配置文件不正确， databases配置项信息不存在")
         if "web" not in conf.sections():

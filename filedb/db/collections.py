@@ -1,11 +1,12 @@
 # TODO ： 统一入参table和table_name
-from filedb.service.fileservice import fileservice_map
+from filedb.service.storage import storage_map
 
 
 # 做成工厂模式吧
 class Collection(object):
     conf = None
     service = None
+    documents = []
 
     @classmethod
     def from_config(cls, conf):  # TODO: 应该是from db 还是from config
@@ -24,9 +25,22 @@ class Collection(object):
         self.service = service
 
     def _get_fileservice_class(self, file_type):
-        if file_type and file_type in fileservice_map.keys():
-            return fileservice_map[file_type]
+        if file_type and file_type in storage_map.keys():
+            return storage_map[file_type]
 
     def find(self, query: dict):
         pass
+    
+    def __getitem__(self, b):
+        for doc in self.documents:
+            if doc.name == b:
+                return doc
+    
+    def __setitem__(self, b, c):
+        for doc in self.documents:
+            if doc.name == b:
+                doc.data = c
+        else:
+            self.documents.append(document)  # TODO: 添加documents的文档
+         
 
