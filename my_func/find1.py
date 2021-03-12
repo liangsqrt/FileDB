@@ -1,15 +1,10 @@
 from filedb.config import DefaultConfig
-import pymongo
-
-
-def find(query_object):
-    data = query_object
-
+from filedb.db.database import Database
+from filedb.config import DatabaseConf
 
 
 if __name__ == '__main__':
-    conf = DefaultConfig()
-    conf.load()
-    print(conf.sections())
+    config = DatabaseConf()
+    Database(name="test", config=config)
 
 

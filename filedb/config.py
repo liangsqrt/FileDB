@@ -9,21 +9,28 @@ base_dir = os.path.abspath(__file__)
 no_collection_sections = ["default", "web", "database"]
 
 
-class DefaultConfig(ConfigFileServiceAbstract, ConfigParser):
+class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
     db_dir = os.path.join(base_dir, "file")
     file_name = "filedb.cfg"
     default_conf_file_dir = os.path.join(base_dir, file_name)
     default_db_file_type = "json"
     project_dir = None
+    file_path = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, conf_file_path=None, *args, **kwargs):
         super(ConfigParser, self).__init__(*args, **kwargs)
-        config_file = closest_file_db_cfg()  # find most clean file.conf
-        if config_file:
-            self.file_path = config_file
+        if conf_file_path:
+            self.file_path = conf_file_path
         else:
-            self.file_path = self.default_config_path
-        self.project_dir = os.path.dirname(self.file_name)
+            config_file = closest_file_db_cfg()  # find most clean file.conf
+            if config_file:
+                self.file_path = config_file
+            else:
+                self.file_path = self.default_config_path
+        self.project_dir = os.path.dirname(self.file_path)
+    
+    def __new__(cls, *args, **kwarg):
+        super(DefaultConfig, cls).__new__()
 
     def active(self):
         self.checkout_envs()
@@ -99,13 +106,13 @@ class CollectionConfig(object):
             self[name] = doc_conf
 
 
-class DatabaseConfig(DefaultConfig):
+class DatabaseConf(DefaultConfig):
     name = ""
     collections: {str: CollectionConfig} = {}
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        super(DatabaseConfig, cls).__new__(*args, **kwargs)
+    def __new__(cls, conf_file_path=None, *args, **kwargs):
+        super(DatabaseConf, cls).__new__(cls, *args, **kwargs)
         if not cls._instance:
             s = cls.__init__(*args, **kwargs)
             cls._instance = s
@@ -114,7 +121,7 @@ class DatabaseConfig(DefaultConfig):
             return cls._instance
 
     def __init__(self, *args, **kwargs):
-        super(DatabaseConfig, self).__init__(*args, **kwargs)
+        super(DatabaseConf, self).__init__(*args, **kwargs)
 
     def initial(self):
         self.initial_collection()
@@ -130,7 +137,7 @@ class DatabaseConfig(DefaultConfig):
 
 
 if __name__ == '__main__':
-    conf = DatabaseConfig()
+    conf = DatabaseConf()
     conf.load()
     print(conf.sections())
     print(conf.initial_collection())

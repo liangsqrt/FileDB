@@ -1,6 +1,6 @@
 from filedb.service.storage import StorageMap
 import os
-from filedb.config import DatabaseConfig
+from filedb.config import DatabaseConf
 from filedb.db.document import BaseDict
 from filedb.db.collections import Collection
 
@@ -29,7 +29,7 @@ class Database(object):
         else:
             return cls._instance[name]
 
-    def __init__(self,name, config: DatabaseConfig):
+    def __init__(self, name, config: DatabaseConf):
         self.check_conf(conf=config)  # 配置内容是否正确、文件是否存在、权限等
         self.name = name
         self.conf = config
@@ -37,7 +37,7 @@ class Database(object):
         self.install_config()
 
     @staticmethod
-    def check_conf(conf: DatabaseConfig):
+    def check_conf(conf: DatabaseConf):
         """
         检测配置文件是否合法
         :key
