@@ -4,7 +4,7 @@ from filedb.interface.config import ConfigFileServiceAbstract
 from filedb.service.storage import StorageMap
 import os
 
-base_dir = os.path.abspath(__file__)
+base_dir = os.path.dirname(__file__)
 
 no_collection_sections = ["default", "web", "database"]
 
@@ -28,27 +28,29 @@ class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
             else:
                 self.file_path = self.default_config_path
         self.project_dir = os.path.dirname(self.file_path)
+        self.active()
     
-    def __new__(cls, *args, **kwarg):
-        super(DefaultConfig, cls).__new__()
+    def __new__(cls, *args, **kwargs):
+        return super(DefaultConfig, cls).__new__(cls, *args, **kwargs)
 
     def active(self):
         self.checkout_envs()
         self.read(self.file_path)
 
     def reinstall(self):
+        self.active()
         self.default_db_file_type = self["database"].get("default_tables_file_type")
         conf_file_dir = self["database"].get("db_base_path")
-        if conf_file_dir.startswith("/"):
-            self.db_dir = conf_file_dir
+        if conf_file_dir.startswith("{pjt}"):
+            pjt_tail = conf_file_dir.replace("{pjt}", "").strip("/")
+            self.db_dir = os.path.join(self.project_dir, pjt_tail)
         else:
             self.db_dir = os.path.join(self.project_dir, conf_file_dir)
-        self.active()
 
     def checkout_envs(self):
         assert os.path.exists(self.default_conf_file_dir), "默认配置文件不存在"
         assert os.path.exists(self.project_dir), "项目目录识别异常"
-        assert os.path.exists(self.default_db_file_type), "项目数据文件路径异常"
+        # assert os.path.exists(self.default_db_file_type), "项目数据文件路径异常"
 
     def load(self):
         self.reinstall()
@@ -61,14 +63,14 @@ class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
         print("配置文件是否规范检查")  # TODO： 配置文件是否规范
 
 
-class DocumentConfig(object):
+class DocumentConf(object):
     file_path = None
     name = None
     type = None
     col_conf = None
 
     def __init__(self, name, file_path, conf_type=None, col_conf=None, *args, **kwargs):
-        super(DocumentConfig, self).__init__(*args, **kwargs)
+        super(DocumentConf, self).__init__(*args, **kwargs)
         self.col_conf = col_conf
         self.file_path = os.path.join(col_conf.db_conf.db_dir, file_path)
         self.name = name
@@ -84,26 +86,33 @@ class DocumentConfig(object):
 class CollectionConfig(object):
     name = None
     docs = {}
-    db_conf: {str: DocumentConfig} = None
+    db_conf: {str: DocumentConf} = None
 
     def __init__(self, name, db_conf=None, *args, **kwargs):
         super(CollectionConfig, self).__init__(*args, **kwargs)
         self.name = name
         self.db_conf = db_conf
+        self.initial_document()
     
     def __getitem__(self, item):
         return self.docs[item]
 
     def __setitem__(self, key, value):
-        assert isinstance(value, DocumentConfig), "collection的config，只支持新增doc类型的config"
+        assert isinstance(value, DocumentConf), "collection的config，只支持新增doc类型的config"
         self.docs[key] = value
         
     def initial_document(self):
         for _doc in self.db_conf[self.name].keys():
             file_path = self.db_conf[self.name][_doc]
             name = _doc
-            doc_conf = DocumentConfig(file_path=file_path, name=name, col_conf=self)
+            doc_conf = DocumentConf(file_path=file_path, name=name, col_conf=self)
             self[name] = doc_conf
+
+    def get_doc_conf(self, name=None):
+        if name:
+            return self.docs.get(name)
+        else:
+            return self.docs
 
 
 class DatabaseConf(DefaultConfig):
@@ -111,17 +120,19 @@ class DatabaseConf(DefaultConfig):
     collections: {str: CollectionConfig} = {}
     _instance = None
 
-    def __new__(cls, conf_file_path=None, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):
         super(DatabaseConf, cls).__new__(cls, *args, **kwargs)
         if not cls._instance:
-            s = cls.__init__(*args, **kwargs)
+            s = super().__new__(cls)
             cls._instance = s
             return s
         else:
             return cls._instance
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, conf_file_path=None, *args, **kwargs):
+        # if conf_file_path:
         super(DatabaseConf, self).__init__(*args, **kwargs)
+        self.initial()
 
     def initial(self):
         self.initial_collection()
@@ -135,11 +146,27 @@ class DatabaseConf(DefaultConfig):
         for _doc in self.collections.values():
             _doc.initial_document()
 
+    def get_col_configs(self, name=None):
+        if name:
+            return self.collections.get(name)
+        return self.collections
+
+    def get_doc_configs(self, name):
+        doc_conf_list = {}
+        for _col_conf in self.collections.values():
+            for _name, _doc in _col_conf.docs.items():
+                doc_conf_list[_name] = _doc
+                if name and _doc.name == name:
+                    return _doc
+        if name:
+            return None
+        return doc_conf_list
+
 
 if __name__ == '__main__':
     conf = DatabaseConf()
     conf.load()
     print(conf.sections())
     print(conf.initial_collection())
-    print(conf.initial_document())
+    print("finished!")
 

@@ -13,7 +13,8 @@
 6. 数组模式和单个dict对象模式：监听模式和数据库模式； 还是直接将单个dict的形式转换为list？
 7. 将所有中文翻译一遍
 8. 现在区分相同元素的唯一方法是index，后期考虑加上_id字段
-
+9. 要怎么才能让config传入后，document读取document的配置， collection读取collection的配置，database读取database的日志，从设计模式上解决这个问题
+10. 整个类的初始化逻辑肯定有问题
 #### notice
 
 1. 我似乎搞混了queryset, filter_set, filter之间的关系： 似乎filterSet里边的next_batch才是我的filterSet的本意，现在的filterSet跟querySet的区别差不多了

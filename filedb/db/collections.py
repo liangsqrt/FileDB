@@ -22,7 +22,7 @@ class Collection(BaseDict):
         self.initial_document()
 
     def initial_document(self):
-        for _name, _conf in self.conf.db_conf.items():
+        for _name, _conf in self.conf.docs.items():
             self[_name] = Document(conf=_conf)
 
     def __getitem__(self, value):

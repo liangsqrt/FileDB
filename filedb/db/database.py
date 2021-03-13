@@ -21,9 +21,9 @@ class Database(object):
         :param args:
         :param kwargs:
         """
-        super(Database, cls).__new__(*args, **kwargs)
+        super(Database, cls).__new__(cls, *args, **kwargs)
         if name not in cls._instance.keys():
-            instance = cls.__init__(*args, **kwargs)
+            instance = super(Database, cls).__new__(cls)
             cls._instance[name] = instance
             return instance
         else:

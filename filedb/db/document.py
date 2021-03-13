@@ -1,6 +1,6 @@
 import os
 from filedb.service.storage import StorageMap
-from filedb.config import DocumentConfig
+from filedb.config import DocumentConf
 from filedb.db.filter import FilterSet
 from filedb.db.formater import Formater
 
@@ -20,14 +20,15 @@ class BaseDict(dict):
 class Document(BaseDict):
     name = None
     file_path = None
-    config: DocumentConfig = None
+    config: DocumentConf = None
     type = None
     storage_service = None
     query_set = None
     format = None
     data: [{}, ] = []
 
-    def __init__(self, conf: DocumentConfig):
+    def __init__(self, conf: DocumentConf):
+        assert isinstance(conf, DocumentConf), "shoud config be document config"
         super(Document, self).__init__()
         self.config = conf
         self.file_path = self.config.file_path
@@ -37,8 +38,9 @@ class Document(BaseDict):
         self.read()
 
     def install_storage(self):
-        service = self._get_storage_class(self.config.type)
-        service.install_config(config=self.conf)
+        service_cls = self._get_storage_class(self.config.type)
+        service = service_cls()
+        service.install_config(config=self.config)
         self.storage_service = service
 
     def read(self):
