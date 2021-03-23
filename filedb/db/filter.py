@@ -122,12 +122,13 @@ class Filter(object):
         if self.father_node and self.priority != self.father_node.priority+1:
             raise Exception("filter查询顺序错误")  # TODO: 丰富错误信息
         
-    def filter(self, data:dict):
+    def filter(self, data: dict):
         """
         同时跟进数据的层级和过滤条件的层级，并一一对饮，这个方法会返回该层级数据被filter
         返回下一层级的result
         确定query_data层级走完了没有
         是否还可以继续搜索
+        这里的逻辑太烂了
         """
         # for data in input_data:
         if isinstance(data, list):
@@ -140,7 +141,7 @@ class Filter(object):
                     return False
         for _k, _v in self.query_data.items():
             if _k in query_map.keys():
-                continue # must has been paserd
+                continue  # must has been paserd
             elif type(_v) in [int, str, float, bool]:
                 r = EqualType()(_k, _v, data)
                 if not r:
@@ -218,12 +219,17 @@ class FilterSet(object):
     status = True
 
     def __init__(self, query_data={}):
+        """
+
+        :param query_data:  查询语句
+        """
         self.query_data = query_data
     
     def filter(self, input_data):
         """
         返回被查找到的元素的索引，如果一条都没有找到，证明查询不合法。
         TODO: 过滤结束后保留合格的数据索引
+        TODO: 返回唯一路径, 用来更新
         """
         target_result = []
         if not isinstance(input_data, list):
