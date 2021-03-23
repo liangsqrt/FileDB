@@ -32,10 +32,23 @@ class JsonFileService(FileService):
         self.config = config
         self.file_path = config.file_path
         self.filename = config.file_path.split("/")[-1]
+        self.check_file()
 
     def is_existed(self):
         if not os.path.exists(self.file_path):
             raise FileExistsError(self.file_path)
+
+    def check_file(self):
+        """
+        检查文件是否存在
+        """
+        file_paths = os.path.split(self.file_path,)
+        tmp_path = ""
+        for _path in file_paths[:-1]:
+            tmp_path = os.path.join(tmp_path, _path)
+            if not os.path.exists(tmp_path):
+                os.mkdir(tmp_path)
+                
 
 
 class YAMLFileService(FileService):

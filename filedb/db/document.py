@@ -28,7 +28,7 @@ class Document(BaseDict):
     format = None
 
     def __init__(self, conf: DocumentConf):
-        assert isinstance(conf, DocumentConf), "shoud config be document config"
+        assert isinstance(conf, DocumentConf), "should config be document config"
         super(Document, self).__init__()
         self.config = conf
         self.file_path = self.config.file_path
@@ -81,13 +81,21 @@ class Document(BaseDict):
     def destroy(self):
         os.remove(self.storage_service.file_path)
 
+    def _create_file(self):
+        fl = open(self.config.file_path, "w")
+        fl.close()
+
+    def update(self, where, data):
+        query_set = FilterSet(query_data=where)  # filterSet继承filter接口， 都一定支持filter方法， 用filter即可查询
+        result = query_set.filter(self.data)  # 如何保证对查询的结果进行更改，能改变被查询的数据文件： 是否返回唯一路径
+        # 当result是字符串的时候，那么对result直接替换，就不会改变结果的值。
+        if type(result) not in [list, dict]:
+            # TODO: 怎么针对不是结构体的结果进行更新
+            pass
+
     def find(self, where: dict, format_dict: dict = {}):
         query_set = FilterSet(query_data=where)
         result = query_set.filter(self.data)
         if format_dict:
             result = [Formater.format(format_dict, x) for x in result]
         return result
-
-    def update(self, where, data):
-        query_set = FilterSet(query_data=where)
-        result = query_set.filter(self.data)

@@ -2,7 +2,9 @@ from filedb.service.storage import StorageMap
 import os
 from filedb.config import DatabaseConf
 from filedb.db.document import BaseDict
+from copy import deepcopy
 from filedb.db.collections import Collection
+from filedb.config import CollectionConf
 
 
 # TODO: 增加对database的错误自检
@@ -12,7 +14,7 @@ class Database(object):
     default_table_type = None
     db_dir = None
     name = None
-    _instance = {}
+    _instance = {}  # for single pattern
 
     def __new__(cls, name: str, config, *args, **kwargs):
         """
@@ -56,6 +58,7 @@ class Database(object):
         专门处理config对database的影响
         :return:
         """
+        # TODO: 哪些配置是需要读取到database中的，config的角色定位是什么
         self.initial_collection()
 
     def initial_collection(self):
@@ -78,7 +81,7 @@ class Database(object):
             _file_path = ".".join(["default/", item, self.default_table_type])
             print("该表不存在, 即将添加: {}".format(_file_path))  # TODO: 规范化报错日志
             self.collections.update({
-                item: self.create_table(_file_path)
+                item: self._create_collection(_file_path)
             })
         return self.collections[item]
 
@@ -88,15 +91,36 @@ class Database(object):
         else:
             raise Exception("不支持的数据类型")
 
-    def create_table(self, table, path="", pattern="single"):
+    def _create_collection(self, col_name, path="", pattern="json"):
         """
 
-        :param table:
+        :param col_name:
         :param path:
         :param pattern: single means that db file content is dict_like; database is list_like just like mongo
         :return:
         """
-        pass
+        if col_name in self.collections.keys():
+            print("该collection名称已经存在了")
+            return False
+        col_conf = CollectionConf(name=col_name, db_conf=self.conf)
+        if path:
+            col_conf.path = os.path.join(self.conf.path, path)
+        else:
+            col_conf.path = os.path.join(self.conf.path, col_name)
+        collection = Collection(col_name, conf=col_conf)
+        return collection
+
+    @property
+    def info(self):
+        return """
+            name:  {name},
+            version: {version},
+            basic_dir: {basic_dir}
+        """.format(
+            name="test",
+            version="test_version",
+            basic_dir="test_dir"
+        )
 
     def export_to_file(self):
         pass

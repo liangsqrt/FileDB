@@ -12,7 +12,7 @@ no_collection_sections = ["default", "web", "database"]
 class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
     db_dir = os.path.join(base_dir, "file")
     file_name = "filedb.cfg"
-    default_conf_file_dir = os.path.join(base_dir, file_name)
+    default_conf_file_path = os.path.join(base_dir, file_name)
     default_db_file_type = "json"
     project_dir = None
     file_path = None
@@ -35,7 +35,7 @@ class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
 
     def active(self):
         self.checkout_envs()
-        self.read(self.file_path)
+        self.read(self.file_path, encoding="utf8")
 
     def reinstall(self):
         self.active()
@@ -48,7 +48,7 @@ class DefaultConfig(ConfigParser, ConfigFileServiceAbstract):
             self.db_dir = os.path.join(self.project_dir, conf_file_dir)
 
     def checkout_envs(self):
-        assert os.path.exists(self.default_conf_file_dir), "默认配置文件不存在"
+        assert os.path.exists(self.default_conf_file_path), "默认配置文件不存在"
         assert os.path.exists(self.project_dir), "项目目录识别异常"
         # assert os.path.exists(self.default_db_file_type), "项目数据文件路径异常"
 
@@ -72,26 +72,28 @@ class DocumentConf(object):
     def __init__(self, name, file_path, conf_type=None, col_conf=None, *args, **kwargs):
         super(DocumentConf, self).__init__(*args, **kwargs)
         self.col_conf = col_conf
-        self.file_path = os.path.join(col_conf.db_conf.db_dir, file_path)
+        self.file_path = os.path.join(col_conf.path, file_path)  # TODO: col的path是什么，相对还是绝对
         self.name = name
         if not conf_type:
             for _type in StorageMap.keys():
                 if _type in self.file_path:
                     conf_type = _type
         if not conf_type:
-            raise Exception("Unsuport for {}".format(self.file_path))
+            raise Exception("Unsupported for {}".format(self.file_path))
         self.type = conf_type
 
 
-class CollectionConfig(object):
+class CollectionConf(object):
     name = None
     docs = {}
-    db_conf: {str: DocumentConf} = None
+    db_conf: {str: object} = None  # DocumentConf
+    path = None  # 一般用不着，代表着在着个col下创建doc时默认存放的路径
 
     def __init__(self, name, db_conf=None, *args, **kwargs):
-        super(CollectionConfig, self).__init__(*args, **kwargs)
+        super(CollectionConf, self).__init__(*args, **kwargs)
         self.name = name
         self.db_conf = db_conf
+        self.path = os.path.join(db_conf.db_dir, name)
         self.initial_document()
     
     def __getitem__(self, item):
@@ -102,10 +104,10 @@ class CollectionConfig(object):
         self.docs[key] = value
         
     def initial_document(self):
-        for _doc in self.db_conf[self.name].keys():
-            file_path = self.db_conf[self.name][_doc]
+        for _doc in self.db_conf[self.name].keys():  # db_conf的keys相当于是sections的keys， 里边的就是具体的文件路径了
+            file_path = os.path.join(*os.path.split(self.db_conf[self.name][_doc]))  # 处理不同系统的文件路径
             name = _doc
-            doc_conf = DocumentConf(file_path=file_path, name=name, col_conf=self)
+            doc_conf = DocumentConf(file_path=file_path, name=name, conf_type=self.db_conf.default_db_file_type, col_conf=self)
             self[name] = doc_conf
 
     def get_doc_conf(self, name=None):
@@ -117,7 +119,8 @@ class CollectionConfig(object):
 
 class DatabaseConf(DefaultConfig):
     name = ""
-    collections: {str: CollectionConfig} = {}
+    collections: {str: CollectionConf} = {}
+    path = None
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -138,9 +141,10 @@ class DatabaseConf(DefaultConfig):
         self.initial_collection()
 
     def initial_collection(self):
+        # TODO: 配置文件中的path是用绝对路径还是相对路径
         for _config in self.sections():
             if _config not in no_collection_sections:
-                self.collections[_config] = CollectionConfig(name=_config, db_conf=self)
+                self.collections[_config] = CollectionConf(name=_config, db_conf=self)
 
     def _initial_document(self):
         for _doc in self.collections.values():
