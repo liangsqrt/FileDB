@@ -72,7 +72,9 @@ class RegexType(object):
     
     def __call__(self, key:str, value, data:dict, *args, **kwargs):
         # return re.match()
-        return re.match(value, data.get(key)).group()
+        r = re.match(value, data.get(key))
+        if r:
+            return r.group()
 
 
 class ContainType(object):
@@ -250,7 +252,7 @@ if __name__ == '__main__':
         ]
     
     f = FilterSet(query_data={"name":{
-        "$re": "zhang."
+        "$re": "zhangsa."
     }})
 
     print(f.filter(data))
